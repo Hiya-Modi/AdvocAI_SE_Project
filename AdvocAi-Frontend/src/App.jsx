@@ -1,20 +1,23 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./Components/Navbar/Navbar";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
-import Chatbot from "./pages/Chatbot";
-import Summary from "./pages/Summary";
+import VerifyOTP from "./pages/VerifyOTP";
 import Lawyers from "./pages/Lawyers";
 import DocumentAnalyzer from "./pages/DocumentAnalyzer";
 import DocumentCreation from "./pages/DocumentCreation";
 import LawyerConnect from "./pages/LawyerConnect";
 import MyDocuments from "./pages/MyDocuments";
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
 function AppContent() {
   const location = useLocation();
-  const hideNavbarRoutes = ['/login', '/signup'];
+  const hideNavbarRoutes = ['/login', '/signup', '/verify-otp'];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
 
   return (
@@ -30,11 +33,10 @@ function AppContent() {
           <Route path="/document-creation" element={<DocumentCreation />} />
           <Route path="/lawyer-connect" element={<LawyerConnect />} />
           <Route path="/my-documents" element={<MyDocuments />} />
-          <Route path="/chatbot" element={<Chatbot />} />
-          <Route path="/summary" element={<Summary />} />
           <Route path="/lawyers" element={<Lawyers />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
         </Routes>
       </main>
     </>
@@ -42,11 +44,24 @@ function AppContent() {
 }
 
 function App() {
-  return (
+  const appContent = (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
+
+  // Only wrap with GoogleOAuthProvider if client ID is available
+  if (GOOGLE_CLIENT_ID) {
+    return (
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        {appContent}
+      </GoogleOAuthProvider>
+    );
+  }
+
+  return appContent;
 }
 
 export default App;
